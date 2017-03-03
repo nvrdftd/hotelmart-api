@@ -18,24 +18,33 @@ MongoClient.connect(config.mongodb)
       if (req.isAuthenticated()) {
         res.json({ isAuthenticated: true });
       } else {
-        res.json({ isAuthenticated: false });
+        res.status(401).json({ isAuthenticated: false });
       }
     });
 
     router.post('/register', (req, res) => {
-      db.collection('user').findOne({ username: req.body.username })
+      let collection = db.collection('user');
+      collection.findOne({ username: req.body.username })
         .then(user => {
           if(user) {
-            res.json({ err: 'Try another username.'})
+            res.sendStatus(400);
           } else {
             bcrypt.hash(req.body.password, 15)
               .then(hash => {
-                db.collection('user').insertOne({
+                collection.insertOne({
                   username: req.body.username,
                   password: hash,
+                  firstname: req.body.firstname,
+                  lastname: req.body.lastname,
+                  home_address: req.body.home_address,
                   admin: false
                 }).then(result => {
-                  res.json({ isAuthenticated: true });
+                  req.login(result.insertedId, (err) => {
+                    if (err) {
+                      console.log(err);
+                    }
+                    res.json({ isAuthenticated: true });
+                  });
                 })
                 .catch(err => console.log(err));
               })
@@ -45,25 +54,28 @@ MongoClient.connect(config.mongodb)
         .catch(err => console.log(err));
     });
 
-    router.post('/cart/add', (req, res) => {
+    router.post('/cart/update', (req, res) => {
       if (req.isAuthenticated()) {
-        db.collection('cart')
-          .findOneAndUpdate({user_id: req.user._id},
-            {$set: {user_id: req.user._id, items: req.body}}, {upsert: true})
-          .then(r => res.json({ operationStatus: 'Items Successfully Added'}));
+        let collection = db.collection('cart');
+        collection.findOneAndUpdate(
+          { user_id: req.user._id },
+          { $set: { cart: req.body.cart }},
+          { upsert: true }
+        ).then(r => res.json({ opStatus: 'Items Successfully Added'}));
       } else {
-        res.json({ operationStatus: 'Need to login'})
+        res.sendStatus(401);
       }
     });
 
-    router.get('/cart', (req, res) => {
+    router.get('/cart/retrieve', (req, res) => {
       if (req.isAuthenticated()) {
-        db.collection('cart')
-          .findOne({user_id: req.user._id},
-            { _id: 0, items: 1})
-          .then(doc => res.json(doc.items));
+        let collection = db.collection('cart');
+        collection.findOne(
+          { user_id: req.user._id },
+          { _id: 0, cart: 1 }
+        ).then(doc => res.json({ cart: doc.cart || [] }));
       } else {
-        res.json({ operationStatus: 'Cart is empty!'})
+        res.sendStatus(401);
       }
     });
 
@@ -71,7 +83,6 @@ MongoClient.connect(config.mongodb)
       req.logout();
       res.json({ isAuthenticated: false });
     });
-  })
-  .catch(err => console.log(err));
+  }).catch(err => console.log(err));
 
 module.exports = router;

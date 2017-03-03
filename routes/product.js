@@ -13,7 +13,7 @@ MongoClient.connect(config.mongodb)
       db.collection('product')
         .find(query)
         .toArray()
-        .then(arr => res.json(arr))
+        .then(arr => res.json({ items: arr }))
         .catch(err => console.log(err));
     });
   })

@@ -52,7 +52,18 @@ MongoClient.connect(config.mongodb)
             {$set: {user_id: req.user._id, items: req.body}}, {upsert: true})
           .then(r => res.json({ operationStatus: 'Items Successfully Added'}));
       } else {
-        res.json({ operationStatus: 'Need to Login'})
+        res.json({ operationStatus: 'Need to login'})
+      }
+    });
+
+    router.get('/cart', (req, res) => {
+      if (req.isAuthenticated()) {
+        db.collection('cart')
+          .findOne({user_id: req.user._id},
+            { _id: 0, items: 1})
+          .then(doc => res.json(doc.items));
+      } else {
+        res.json({ operationStatus: 'Cart is empty!'})
       }
     });
 

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Hotel Purchasing Service",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "node server.js"
   },
   "author": "Lung Chen Huang <perfecthuang413@gmail.com>",
   "license": "UNLICENSED",

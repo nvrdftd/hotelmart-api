@@ -73,7 +73,7 @@ MongoClient.connect(config.mongodb)
     app.use('/product', require('./routes/product'));
     app.use('/user', require('./routes/user'));
 
-    app.listen(3500, function() {
+    app.listen(config.port, function() {
       console.log(`Server running on port ${this.address().port}`);
     });
   })

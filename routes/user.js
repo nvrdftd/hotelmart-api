@@ -29,7 +29,7 @@ MongoClient.connect(config.mongodb)
           if(user) {
             res.sendStatus(400);
           } else {
-            bcrypt.hash(req.body.password, 15)
+            bcrypt.hash(req.body.password, 12)
               .then(hash => {
                 collection.insertOne({
                   username: req.body.username,

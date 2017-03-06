@@ -72,6 +72,7 @@ MongoClient.connect(config.mongodb)
     app.use('/categorylist', require('./routes/category'));
     app.use('/product', require('./routes/product'));
     app.use('/user', require('./routes/user'));
+    app.use('/admin', require('./routes/admin'));
 
     app.listen(config.port, function() {
       console.log(`Server running on port ${this.address().port}`);
